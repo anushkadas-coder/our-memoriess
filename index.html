@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Memories ❤️</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background-color: #fdf6f0;
+            background-image: url('https://www.transparenttextures.com/patterns/flower-bed.png'); 
+            background-size: contain;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            color: #444;
+        }
+
+        h1 {
+            font-size: 36px;
+            color: #4A3F35;
+            margin-top: 20px;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+
+        .upload-container:hover {
+            transform: scale(1.05);
+        }
+
+        .drag-area {
+            border: 2px dashed #9C6F6F;
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            background: rgba(255, 240, 245, 0.4);
+        }
+
+        .custom-file-upload {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #9C6F6F;
+            color: white;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .media-item {
+            position: relative;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .media-item img, .media-item video {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>❤️ Our Memories ❤️</h1>
+
+    <div class="upload-container">
+        <div class="drag-area" id="drop-area">
+            <p>Drag & Drop or Click to Upload</p>
+            <label class="custom-file-upload">
+                <input type="file" id="fileInput" accept="image/*,video/*" multiple>
+                📤 Upload Memories ❤️
+            </label>
+        </div>
+    </div>
+
+    <div class="gallery" id="gallery"></div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const gallery = document.getElementById('gallery');
+
+        fileInput.addEventListener('change', handleFiles);
+        document.addEventListener("DOMContentLoaded", loadSavedMedia);
+
+        function handleFiles(event) {
+            const files = event.target.files;
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    saveToLocalStorage(e.target.result, file.type);
+                    addMediaToGallery(e.target.result, file.type);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function addMediaToGallery(src, type) {
+            const mediaItem = document.createElement('div');
+            mediaItem.classList.add('media-item');
+
+            let mediaElement;
+            if (type.startsWith('image')) {
+                mediaElement = document.createElement('img');
+            } else if (type.startsWith('video')) {
+                mediaElement = document.createElement('video');
+                mediaElement.setAttribute('controls', 'true');
+            }
+
+            mediaElement.src = src;
+            mediaItem.appendChild(mediaElement);
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerText = '🗑️';
+            deleteBtn.classList.add('delete-btn');
+            deleteBtn.onclick = () => {
+                mediaItem.remove();
+                removeFromLocalStorage(src);
+            };
+
+            mediaItem.appendChild(deleteBtn);
+            gallery.appendChild(mediaItem);
+        }
+
+        function saveToLocalStorage(data, type) {
+            let savedMedia = JSON.parse(localStorage.getItem("mediaGallery")) || [];
+            savedMedia.push({ src: data, type: type });
+            localStorage.setItem("mediaGallery", JSON.stringify(savedMedia));
+        }
+
+        function loadSavedMedia() {
+            let savedMedia = JSON.parse(localStorage.getItem("mediaGallery")) || [];
+            savedMedia.forEach(media => {
+                addMediaToGallery(media.src, media.type);
+            });
+        }
+
+        function removeFromLocalStorage(src) {
+            let savedMedia = JSON.parse(localStorage.getItem("mediaGallery")) || [];
+            savedMedia = savedMedia.filter(media => media.src !== src);
+            localStorage.setItem("mediaGallery", JSON.stringify(savedMedia));
+        }
+    </script>
+
+</body>
+</html>
